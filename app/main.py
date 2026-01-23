@@ -26,4 +26,4 @@ def detect_language(request: TextRequest):
 
 @app.post("/grammar-correct")
 def grammar_correct(request: GrammarRequest):
-    return grammar_corrector.correct_grammar(request.text)
+    return grammar_corrector.respond(request.text)

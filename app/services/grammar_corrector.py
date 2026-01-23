@@ -3,50 +3,42 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
-
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 class GrammarCorrector:
-    def correct_grammar(self, text: str) -> dict:
-        if not text.strip():
+    def respond(self, user_input: str) -> dict:
+        if not user_input.strip():
             return {
-                "original": text,
-                "corrected": text,
-                "explanation": "No text provided."
+                "response": "Could you please type something so I can help you? 😊"
             }
 
-        prompt = (
-            "You are an English grammar tutor. "
-            "Correct the sentence and explain the correction briefly.\n\n"
-            f"Sentence: {text}\n\n"
-            "Return response in this format:\n"
-            "Corrected: <sentence>\n"
-            "Explanation: <short explanation>"
-        )
+        system_prompt = """
+            You are LinguaMate, a friendly and polite AI English tutor.
+
+            Your behavior rules:
+            - If the user greets (hi, hello, good morning, etc.), respond warmly and naturally. Do NOT correct grammar.
+            - If the user explicitly asks to correct grammar, help them politely with explanation.
+            - If the user writes a sentence with a grammar mistake, gently explain and correct it.
+            - If the sentence is already correct, give positive feedback.
+            - Never sound robotic or harsh.
+            - Vary responses slightly each time.
+            - Keep explanations short, friendly, and easy to understand.
+            - Do NOT show labels like "Corrected:" or "Original:".
+            - Respond like a human tutor chatting with a student.
+        """
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a helpful grammar assistant."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
             ],
-            temperature=0.3
+            temperature=0.7
         )
 
-        content = response.choices[0].message.content
-
-        corrected = ""
-        explanation = ""
-
-        for line in content.split("\n"):
-            if line.lower().startswith("corrected"):
-                corrected = line.split(":", 1)[1].strip()
-            elif line.lower().startswith("explanation"):
-                explanation = line.split(":", 1)[1].strip()
+        reply = response.choices[0].message.content.strip()
 
         return {
-            "original": text,
-            "corrected": corrected or text,
-            "explanation": explanation or "No explanation provided."
+            "response": reply
         }
