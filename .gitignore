@@ -1,0 +1,5 @@
+# Virtual environment
+venv
+
+# ML model
+app/models/*.bin
