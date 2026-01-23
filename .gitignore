@@ -3,3 +3,9 @@ venv
 
 # ML model
 app/models/*.bin
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
