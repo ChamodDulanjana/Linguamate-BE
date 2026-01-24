@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -10,35 +11,52 @@ class GrammarCorrector:
     def respond(self, user_input: str) -> dict:
         if not user_input.strip():
             return {
-                "response": "Could you please type something so I can help you? 😊"
+                "response": "Could you please type something so I can help you? 😊",
+                "hasActionButtons": False
             }
 
         system_prompt = """
-            You are LinguaMate, a friendly and polite AI English tutor.
+            You are LinguaMate, a friendly AI English tutor.
 
-            Your behavior rules:
-            - If the user greets (hi, hello, good morning, etc.), respond warmly and naturally. Do NOT correct grammar.
-            - If the user explicitly asks to correct grammar, help them politely with explanation.
-            - If the user writes a sentence with a grammar mistake, gently explain and correct it.
+            Rules:
+            - If the user greets or chats casually, respond naturally. No grammar feedback.
+            - If the sentence has a grammar mistake, politely explain and correct it.
             - If the sentence is already correct, give positive feedback.
-            - Never sound robotic or harsh.
-            - Vary responses slightly each time.
-            - Keep explanations short, friendly, and easy to understand.
-            - Do NOT show labels like "Corrected:" or "Original:".
-            - Respond like a human tutor chatting with a student.
+            - Sound friendly, human, and encouraging.
+
+            After responding, decide:
+            - hasActionButtons = true → if grammar correction was needed
+            - hasActionButtons = false → otherwise
+
+            Return ONLY valid JSON in this format:
+            {
+            "response": "<natural tutor reply>",
+            "hasActionButtons": true/false
+            }
         """
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
+            response_format={"type": "json_object"},  # forces JSON
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}
             ],
-            temperature=0.7
+            temperature=0.5
         )
 
-        reply = response.choices[0].message.content.strip()
+        # Parse JSON safely
+        content = response.choices[0].message.content
+
+        try:
+            parsed = json.loads(content)
+        except json.JSONDecodeError:
+            # fallback: extract JSON manually
+            start = content.find("{")
+            end = content.rfind("}") + 1
+            parsed = json.loads(content[start:end])
 
         return {
-            "response": reply
+            "response": parsed.get("response", ""),
+            "hasActionButtons": parsed.get("hasActionButtons", False)
         }
