@@ -1,10 +1,5 @@
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
 import json
-
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from app.core.openai_client import client
 
 
 class GrammarCorrector:
@@ -16,7 +11,7 @@ class GrammarCorrector:
             }
 
         system_prompt = """
-            You are LinguaMate, a friendly AI English tutor.
+            You are LinguaMate, a friendly AI language tutor.
 
             Rules:
             - If the user greets or chats casually, respond naturally. No grammar feedback.
