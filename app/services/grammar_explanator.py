@@ -3,23 +3,20 @@ from app.core.openai_client import client
 
 
 class GrammarExplanator:
-    def respond(self, learning_concept: str, category: str) -> dict:
-        if not learning_concept.strip():
-            return {
-                "learningConceptExplanation": "",
-                "learningConceptExamples": []
-            }
+    def respond(self, learning_concepts: list[str]) -> list[dict]:
+        if not learning_concepts:
+            return []
+            
         system_prompt = """
             You are LinguaMate, an AI language learning content generator.
 
             This task is NOT conversation.
-            This task is to GENERATE LEARNING CONTENT for a GIVEN concept.
+            This task is to GENERATE LEARNING CONTENT for given concepts.
 
             You will receive:
-            - learningConcept (canonical snake_case ID)
-            - category (broad category)
+            - learningConcepts (list of human-readable grammar concepts)
 
-            Your responsibilities:
+            Your responsibilities for EACH concept:
             - Generate a GENERAL explanation of the learning concept.
             - Generate EXACTLY 3 example pairs (correct vs incorrect).
             - Examples must be GENERIC and reusable.
@@ -32,12 +29,16 @@ class GrammarExplanator:
             - Incorrect examples must be realistic learner mistakes.
             - Do NOT include markdown or extra text.
 
-            Return ONLY valid JSON:
-
+            Return ONLY valid JSON in this format:
             {
-                "learningConceptExplanation": "<general explanation>",
-                "learningConceptExamples": [
-                    { "correct": "...", "incorrect": "..." }
+                "explanations": [
+                    {
+                        "learningConcept": "<concept name>",
+                        "learningConceptExplanation": "<general explanation>",
+                        "learningConceptExamples": [
+                            { "correct": "...", "incorrect": "..." }
+                        ]
+                    }
                 ]
             }
         """
@@ -50,8 +51,7 @@ class GrammarExplanator:
                 {
                     "role": "user",
                     "content": json.dumps({
-                        "learningConcept": learning_concept,
-                        "category": category
+                        "learningConcepts": learning_concepts
                     })
                 }
             ],
@@ -67,13 +67,4 @@ class GrammarExplanator:
             end = content.rfind("}") + 1
             parsed = json.loads(content[start:end])
 
-        return {
-            "learningConcept": learning_concept,
-            "category": category,
-            "learningConceptExplanation": parsed.get(
-                "learningConceptExplanation", ""
-            ),
-            "learningConceptExamples": parsed.get(
-                "learningConceptExamples", []
-            )
-        }
+        return parsed.get("explanations", [])
