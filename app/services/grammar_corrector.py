@@ -1,5 +1,6 @@
 import json
 from app.core.openai_client import client
+from app.core.openai_retry import call_openai_with_retry
 
 
 class GrammarCorrector:
@@ -45,6 +46,7 @@ class GrammarCorrector:
             - BE PRECISE WITH GRAMMATICAL TERMINOLOGY.
             - Do NOT misidentify tenses (e.g., "was trying" is Past Continuous, NOT Present Continuous).
             - Ensure the explanation matches the correction physically and grammatically.
+            - If there are any spelling mistakes, highlight them and explain the correction in the `response` text itself so the user learns immediately but do not put it in the `learningConcepts`.
 
             After responding, decide:
             - hasActionButtons = true → if correction was needed
@@ -61,15 +63,18 @@ class GrammarCorrector:
             }
         """
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_input}
-            ],
-            temperature=0.3
+        response = call_openai_with_retry(
+            lambda: client.chat.completions.create(
+                model="gpt-4o-mini",
+                response_format={"type": "json_object"},
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_input}
+                ],
+                temperature=0.3
+            )
         )
+
 
         content = response.choices[0].message.content
 
