@@ -1,5 +1,6 @@
 import json
 from app.core.openai_client import client
+from app.core.openai_retry import call_openai_with_retry
 
 
 class GrammarExplanator:
@@ -43,19 +44,21 @@ class GrammarExplanator:
             }
         """
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": json.dumps({
-                        "learningConcepts": learning_concepts
-                    })
-                }
-            ],
-            temperature=0.2  # LOW = stable output
+        response = call_openai_with_retry(
+            lambda: client.chat.completions.create(
+                model="gpt-4o-mini",
+                response_format={"type": "json_object"},
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {
+                        "role": "user",
+                        "content": json.dumps({
+                            "learningConcepts": learning_concepts
+                        })
+                    }
+                ],
+                temperature=0.2  # LOW = stable output
+            )
         )
 
         content = response.choices[0].message.content

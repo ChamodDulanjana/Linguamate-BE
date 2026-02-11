@@ -1,5 +1,6 @@
 import json
 from app.core.openai_client import client
+from app.core.openai_retry import call_openai_with_retry
 
 
 class ActivityGenerator:
@@ -15,19 +16,21 @@ class ActivityGenerator:
         if not system_prompt:
             raise ValueError("Invalid activity type")
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": json.dumps({
-                        "learningConcepts": learning_concepts
-                    })
-                }
-            ],
-            temperature=0.5
+        response = call_openai_with_retry(
+            lambda: client.chat.completions.create(
+                model="gpt-4o-mini",
+                response_format={"type": "json_object"},
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {
+                        "role": "user",
+                        "content": json.dumps({
+                            "learningConcepts": learning_concepts
+                        })
+                    }
+                ],
+                temperature=0.5
+            )
         )
 
         content = response.choices[0].message.content
@@ -39,18 +42,21 @@ class ActivityGenerator:
 QUIZ_PROMPT = """
     You are LinguaMate, an AI language learning activity generator.
 
-    Task: Generate a multiple-choice quiz based on the learning concepts provided.
+    Task: Generate a multiple-choice quiz based on the learning concepts provided. Only Quiz questions should be generated.
+    Do not generate any other content like fill-in-the-blanks or speaking practice.
 
     Input:
     - learningConcepts: list of human-readable grammar concepts
 
     Rules:
-    - Generate 5 questions.
-    - Each question must target ONE specific concept.
-    - Use the learningConcepts to create relevant questions.
-    - Provide clear explanation for each answer.
-    - Do NOT include markdown.
-    - Do NOT add extra text outside JSON.
+    - Generate EXACTLY 5 questions.
+    - Each question must test ONE or MORE of the given learning concepts.
+    - Each question must have EXACTLY 4 options.
+    - ONLY ONE option must be correct.
+    - Incorrect options must be realistic learner mistakes.
+    - shuffle the options.
+    - Do not include markdown.
+    - Do not add extra text outside JSON.
 
     Output Format (JSON only):
     {
@@ -58,13 +64,8 @@ QUIZ_PROMPT = """
         "questions": [
             {
                 "question": "What is the correct form of the verb?",
-                "options": {
-                    "A": "Correct answer",
-                    "B": "Distractor",
-                    "C": "Distractor",
-                    "D": "Distractor"
-                },
-                "correctOptionIndex": 0
+                "options": ["...", "...", "...", "..."],
+                "correctOptionIndex": 0 | 1 | 2 | 3
             }
         ]
     }
