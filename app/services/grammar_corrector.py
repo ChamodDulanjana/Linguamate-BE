@@ -15,14 +15,12 @@ class GrammarCorrector:
             }
 
         lang_info = language_detector.detect_language(user_input)
-        detected_language = lang_info['language']
-        detected_confidence = lang_info['confidence']
 
-        system_prompt = """
+        system_prompt = f"""
             You are LinguaMate, a friendly AI language tutor.
 
-            Detected language: {detected_language}
-            Language confidence: {detected_confidence}
+            Detected language: {lang_info.language}
+            Language confidence: {lang_info.confidence}
 
             IMPORTANT:
             - Always respond in the detected language unless the user switches language.
@@ -66,6 +64,7 @@ class GrammarCorrector:
             - hasActionButtons = false → otherwise
 
             Return ONLY valid JSON:
+        """ + """
 
             {
                 "response": "<natural tutor reply>",
@@ -100,6 +99,7 @@ class GrammarCorrector:
 
         output = {
             "response": parsed.get("response", ""),
+            "language": lang_info.language,
             "hasActionButtons": parsed.get("hasActionButtons", False),
             "learningConcepts": parsed.get("learningConcepts", [])
         }
