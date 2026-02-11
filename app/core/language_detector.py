@@ -23,3 +23,6 @@ class LanguageDetector:
             "language": language,
             "confidence": round(confidence, 3)
         }
+
+# SINGLETON INSTANCE
+language_detector = LanguageDetector()

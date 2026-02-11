@@ -1,6 +1,7 @@
 import json
 from app.core.openai_client import client
 from app.core.openai_retry import call_openai_with_retry
+from app.core.language_detector import language_detector
 
 
 class GrammarCorrector:
@@ -13,8 +14,20 @@ class GrammarCorrector:
                 "category": None
             }
 
+        lang_info = language_detector.detect_language(user_input)
+        detected_language = lang_info['language']
+        detected_confidence = lang_info['confidence']
+
         system_prompt = """
             You are LinguaMate, a friendly AI language tutor.
+
+            Detected language: {detected_language}
+            Language confidence: {detected_confidence}
+
+            IMPORTANT:
+            - Always respond in the detected language unless the user switches language.
+            - Apply grammar rules ONLY for the detected language.
+            - Do NOT assume English unless language = "en".
 
             Rules:
             - If the user greets or chats casually, respond naturally. Do NOT give grammar feedback for simple greetings.
@@ -85,8 +98,13 @@ class GrammarCorrector:
             end = content.rfind("}") + 1
             parsed = json.loads(content[start:end])
 
-        return {
+        output = {
             "response": parsed.get("response", ""),
             "hasActionButtons": parsed.get("hasActionButtons", False),
             "learningConcepts": parsed.get("learningConcepts", [])
         }
+
+        if "Spelling" in output["learningConcepts"]:
+            output["learningConcepts"].remove("Spelling")
+
+        return output
