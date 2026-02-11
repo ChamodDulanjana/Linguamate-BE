@@ -34,4 +34,4 @@ def grammar_explain(request: LearningConceptRequest):
 
 @app.post("/generate-activity")
 def generate_activity(request: ActivityRequest):
-    return activity_generator.generate(request.learningConcepts, request.activityType)
+    return activity_generator.generate(request.learningConcepts, request.activityType, request.language)

@@ -4,7 +4,7 @@ from app.core.openai_retry import call_openai_with_retry
 
 
 class ActivityGenerator:
-    def generate(self, learning_concepts: list[str], activity_type: str) -> dict:
+    def generate(self, learning_concepts: list[str], activity_type: str, language: str) -> dict:
 
         prompt_map = {
             "QUIZ": QUIZ_PROMPT,
@@ -12,9 +12,11 @@ class ActivityGenerator:
             "SPEAKING_PRACTICE": SPEAKING_PROMPT
         }
 
-        system_prompt = prompt_map.get(activity_type)
-        if not system_prompt:
+        prompt_template = prompt_map.get(activity_type)
+        if not prompt_template:
             raise ValueError("Invalid activity type")
+
+        system_prompt = prompt_template.replace("{language}", language)
 
         response = call_openai_with_retry(
             lambda: client.chat.completions.create(
@@ -25,7 +27,8 @@ class ActivityGenerator:
                     {
                         "role": "user",
                         "content": json.dumps({
-                            "learningConcepts": learning_concepts
+                            "learningConcepts": learning_concepts,
+                            "language": language
                         })
                     }
                 ],
@@ -42,11 +45,18 @@ class ActivityGenerator:
 QUIZ_PROMPT = """
     You are LinguaMate, an AI language learning activity generator.
 
+    Detected language: {language}
+
+    IMPORTANT LANGUAGE RULES:
+    - Generate ALL questions, options, and text in the detected language.
+    - Do NOT assume English unless language = "en".
+
     Task: Generate a multiple-choice quiz based on the learning concepts provided. Only Quiz questions should be generated.
     Do not generate any other content like fill-in-the-blanks or speaking practice.
 
     Input:
     - learningConcepts: list of human-readable grammar concepts
+    - language: language of the quiz
 
     Rules:
     - Generate EXACTLY 5 questions.
@@ -75,6 +85,12 @@ QUIZ_PROMPT = """
 
 FILL_BLANK_PROMPT = """
     You are LinguaMate, an AI language learning activity generator.
+
+    Detected language: {language}
+
+    IMPORTANT LANGUAGE RULES:
+    - All sentences and explanations MUST be written in the detected language.
+    - Do NOT assume English unless language = "en".
 
     Task: Generate a fill-in-the-blank exercise based on the learning concepts provided.
 
@@ -108,6 +124,13 @@ FILL_BLANK_PROMPT = """
 
 SPEAKING_PROMPT = """
     You are LinguaMate, an AI language learning activity generator.
+
+    Detected language: {language}
+
+    IMPORTANT LANGUAGE RULES:
+    - All prompts and guiding questions MUST be written in the detected language.
+    - Topics must reflect the learning concepts naturally.
+    - Do NOT assume English unless language = "en".
 
     Task: Generate speaking practice prompts based on the learning concepts provided.
 
