@@ -29,7 +29,7 @@ def grammar_correct(request: GrammarRequest):
 
 @app.post("/grammar-explain")
 def grammar_explain(request: LearningConceptRequest):
-    return grammar_explanator.respond(request.learningConcepts)
+    return grammar_explanator.respond(request.learningConcepts, request.language)
 
 
 @app.post("/generate-activity")

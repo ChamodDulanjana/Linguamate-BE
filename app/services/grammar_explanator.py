@@ -4,12 +4,20 @@ from app.core.openai_retry import call_openai_with_retry
 
 
 class GrammarExplanator:
-    def respond(self, learning_concepts: list[str]) -> list[dict]:
+    def respond(self, learning_concepts: list[str], language: str) -> list[dict]:
         if not learning_concepts:
             return []
             
-        system_prompt = """
+        system_prompt = f"""
             You are LinguaMate, an AI language learning content generator.
+
+            Detected language: {language}
+
+            IMPORTANT LANGUAGE RULES:
+            - Generate ALL explanations and examples in the detected language.
+            - Use grammatical terminology appropriate for the detected language.
+            - Do NOT assume English grammar rules unless language = "en".
+            - If language is unknown, default to English.
 
             This task is NOT conversation.
             This task is to GENERATE LEARNING CONTENT for given concepts.
@@ -29,8 +37,10 @@ class GrammarExplanator:
             - Explanation must be concise and neutral.
             - Incorrect examples must be realistic learner mistakes.
             - Do NOT include markdown or extra text.
+            - Always return explanations in the SAME ORDER as input learningConcepts.
 
             Return ONLY valid JSON in this format:
+        """ + """
             {
                 "explanations": [
                     {
