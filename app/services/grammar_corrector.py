@@ -78,7 +78,7 @@ class GrammarCorrector:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_input}
                 ],
-                temperature=0.7
+                temperature=0.3
             )
         )
 
@@ -99,7 +99,8 @@ class GrammarCorrector:
             "learningConcepts": parsed.get("learningConcepts", [])
         }
 
-        if "Spelling" in output["learningConcepts"]:
-            output["learningConcepts"].remove("Spelling")
+        # remove spelling concepts from output
+        remove_spelling = ["Spelling", "Spelling accuracy", "Spelling mistakes", "Spelling correction"]
+        output["learningConcepts"] = [concept for concept in output["learningConcepts"] if concept not in remove_spelling]
 
         return output
