@@ -27,7 +27,7 @@ def grammar_correct(request: GrammarRequest):
     return grammar_corrector.respond(request.text)
 
 
-@app.post("/grammar-explain")
+@app.post("/learning-concept-explain")
 def grammar_explain(request: LearningConceptRequest):
     return grammar_explanator.respond(request.learningConcepts, request.language)
 

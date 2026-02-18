@@ -9,9 +9,7 @@ class GrammarCorrector:
         if not user_input.strip():
             return {
                 "response": "Could you please type something so I can help you? 😊",
-                "hasActionButtons": False,
-                "learningConcept": None,
-                "category": None
+                "hasActionButtons": False
             }
 
         lang_info = language_detector.detect_language(user_input)
@@ -24,7 +22,6 @@ class GrammarCorrector:
 
             IMPORTANT:
             - Always respond in the detected language unless the user switches language.
-            - Apply grammar rules ONLY for the detected language.
             - Do NOT assume English unless language = "en".
 
             Rules:
@@ -55,9 +52,7 @@ class GrammarCorrector:
             - Explain the correction in the `response` text itself so the user learns immediately.
             - If multiple sentences have the SAME mistake type, return ONLY ONE concept.
             - BE PRECISE WITH GRAMMATICAL TERMINOLOGY.
-            - Do NOT misidentify tenses (e.g., "was trying" is Past Continuous, NOT Present Continuous).
             - Ensure the explanation matches the correction physically and grammatically.
-            - If there are any spelling mistakes, highlight them and explain the correction in the `response` text itself so the user learns immediately but do not put it in the `learningConcepts`.
 
             After responding, decide:
             - hasActionButtons = true → if correction was needed
@@ -83,7 +78,7 @@ class GrammarCorrector:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_input}
                 ],
-                temperature=0.3
+                temperature=0.7
             )
         )
 
