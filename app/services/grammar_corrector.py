@@ -2,7 +2,9 @@ import json
 from app.core.openai_client import client
 from app.core.openai_retry import call_openai_with_retry
 from app.core.language_detector import language_detector
+from app.services.concept_extractor import ConceptExtractor
 
+concept_extractor = ConceptExtractor()
 
 class GrammarCorrector:
     def respond(self, user_input: str) -> dict:
@@ -13,12 +15,12 @@ class GrammarCorrector:
             }
 
         lang_info = language_detector.detect_language(user_input)
+        language = lang_info.language
 
         system_prompt = f"""
             You are LinguaMate, a friendly AI language tutor.
 
-            Detected language: {lang_info.language}
-            Language confidence: {lang_info.confidence}
+            Detected language: {language}
 
             IMPORTANT:
             - Always respond in the detected language unless the user switches language.
@@ -30,7 +32,6 @@ class GrammarCorrector:
             - If the sentence has ANY language usage mistakes (grammar, spelling, awkward phrasing):
                 1. Politely acknowledge the effort.
                 2. PROVIDE THE CORRECTED VERSION of the specific sentence(s) in your response text.
-                3. Identify EXACTLY ONE underlying learning concept for each mistake type found.
 
              The user may provide:
             - A single sentence
@@ -39,18 +40,10 @@ class GrammarCorrector:
 
             Your responsibilities:
             - Analyze the input and detect ALL language usage mistakes in ALL sentences.
-            - For each DISTINCT mistake type, identify ONE learning concept.
             - Ensure the `response` field contains the readable correction.
 
             CRITICAL RULES (MUST FOLLOW):
-            - You MAY return multiple learning concepts.
-            - Each learning concept MUST be UNIQUE (no duplicates).
-            - Each learning concept MUST represent ONE teachable idea.
-            - Use human-readable names for learningConcept (e.g., "Present continuous tense", "Subject-verb agreement").
-            - Do NOT use snake_case IDs.
-            - Do NOT invent vague names.
             - Explain the correction in the `response` text itself so the user learns immediately.
-            - If multiple sentences have the SAME mistake type, return ONLY ONE concept.
             - BE PRECISE WITH GRAMMATICAL TERMINOLOGY.
             - Ensure the explanation matches the correction physically and grammatically.
 
@@ -64,9 +57,7 @@ class GrammarCorrector:
             {
                 "response": "<natural tutor reply>",
                 "hasActionButtons": true/false,
-                "learningConcepts": [
-                    "<Human readable concept name>"
-                ]
+                "correctedText": "<fully corrected version>"
             }
         """
 
@@ -82,11 +73,18 @@ class GrammarCorrector:
             )
         )
 
-
         content = response.choices[0].message.content
 
         try:
             parsed = json.loads(content)
+
+            if parsed.get("hasActionButtons"):
+                learning_concepts = concept_extractor.extract(
+                    user_input, 
+                    parsed.get("correctedText", ""),
+                    language
+                )
+                parsed["learningConcepts"] = learning_concepts
         except json.JSONDecodeError:
             start = content.find("{")
             end = content.rfind("}") + 1
@@ -98,9 +96,5 @@ class GrammarCorrector:
             "hasActionButtons": parsed.get("hasActionButtons", False),
             "learningConcepts": parsed.get("learningConcepts", [])
         }
-
-        # remove spelling concepts from output
-        remove_spelling = ["Spelling", "Spelling accuracy", "Spelling mistakes", "Spelling correction"]
-        output["learningConcepts"] = [concept for concept in output["learningConcepts"] if concept not in remove_spelling]
 
         return output
