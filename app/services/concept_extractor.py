@@ -31,9 +31,6 @@ class ConceptExtractor:
             - Subject-verb agreement
             - Articles
 
-            CRITICAL RULE:
-            - If learning concepts is not in examples, generate it based on the correction and the language.
-
             WORKFLOW (STRICT):
             1. Compare original and corrected text.
             2. Identify ONLY the changes.
