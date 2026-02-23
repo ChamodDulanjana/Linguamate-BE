@@ -96,19 +96,17 @@ FILL_BLANK_PROMPT = """
 
     Input:
     - learningConcepts: list of human-readable grammar concepts
+    - language: language of the quiz
 
     Output Format (JSON only):
     {
         "activityType": "FILL_IN_THE_BLANKS",
-        "title": "Fill in the Blanks: [Concepts]",
-        "description": "Complete the sentences using the correct forms",
-        "instructions": "Fill in the blanks with the correct word or phrase.",
-        "sentences": [
+        "questions": [
             {
-                "sentenceId": "1",
-                "text": "She ___ (go) to the park yesterday.",
-                "correctAnswer": "went",
-                "explanation": "Use simple past tense for completed past actions."
+                "sentencePart1": "The cat is ",
+                "sentencePart2": " on the mat.",
+                "options": ["sleeping", "slept", "sleeps", "sleep"],
+                "correctOptionIndex": 3 | 1 | 2 | 0,
             }
         ]
     }
