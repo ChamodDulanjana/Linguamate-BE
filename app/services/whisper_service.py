@@ -11,8 +11,9 @@ class WhisperService:
         transcription = call_openai_with_retry(
             lambda: client.audio.transcriptions.create(
                 model="whisper-1",
-                file=(audio.filename, audio.file, audio.content_type)
+                file=(audio.filename, audio.file, audio.content_type),
+                response_format="verbose_json"
             )
         )
 
-        return transcription.text
+        return transcription

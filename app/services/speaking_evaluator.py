@@ -27,7 +27,8 @@ class SpeakingEvaluator:
                 word order.
 
             - Be strict but encouraging.
-            - Provide SHORT learner-friendly feedback.
+            - Provide SHORT supportive feedback like "Grate work" or "Keep it up".
+            - Feedback must be less than 6 words.
 
             OUTPUT JSON ONLY:
         """ + """
@@ -35,7 +36,7 @@ class SpeakingEvaluator:
             {
                 "score": 0.0,
                 "isCorrect": true/false,
-                "feedback": "Short feedback for learner"
+                "feedback": "short feedback for learner"
             }
         """
 

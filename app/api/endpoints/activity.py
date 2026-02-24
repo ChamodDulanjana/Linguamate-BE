@@ -3,11 +3,13 @@ from app.models.activity_request import ActivityRequest
 from app.services.activity_generator import ActivityGenerator
 from app.services.whisper_service import WhisperService
 from app.services.speaking_evaluator import SpeakingEvaluator
+from app.services.pronunciation_heatmap import PronunciationHeatmap
 
 router = APIRouter()
 activity_generator = ActivityGenerator()
 whisper_service = WhisperService()
 speaking_evaluator = SpeakingEvaluator()
+heatmap_engine = PronunciationHeatmap()
 
 @router.post("/generate-activity")
 def generate_activity(request: ActivityRequest):
@@ -20,27 +22,26 @@ async def evaluate_speaking(
     language: str = Form(...)
 ):
     # 🔹 Step 1 — Whisper transcription
-    spoken_text = whisper_service.transcribe(audio)
+    transcription = whisper_service.transcribe(audio)
+    spoken_text = transcription.text
 
-    # 🔹 Step 2 — Evaluate speaking
+    # 🔹 Step 2 — Generate heatmap
+    heatmap = heatmap_engine.generate(
+        targetSentence,
+        spoken_text
+    )
+
+    # 🔹 Step 3 — Evaluate speaking
     result = speaking_evaluator.evaluate(
         targetSentence,
         spoken_text,
         language
     )
 
-    print("spoken_text")
-    print(spoken_text)
-    print("targetSentence")
-    print(targetSentence)
-    print("language")
-    print(language)
-    print("result")
-    print(result)
-
     return {
         "transcript": spoken_text,
         "score": result["score"],
         "isCorrect": result["isCorrect"],
-        "feedback": result["feedback"]
+        "feedback": result["feedback"],
+        "heatmap": heatmap
     }
