@@ -138,18 +138,11 @@ SPEAKING_PROMPT = """
     Output Format (JSON only):
     {
         "activityType": "SPEAKING_PRACTICE",
-        "title": "Speaking Practice: [Concepts]",
-        "description": "Practice speaking about [Concepts]",
-        "instructions": "Speak for 30-60 seconds on each topic.",
-        "prompts": [
+        "sentences": [
             {
-                "promptId": "1",
-                "topic": "Topic related to concept",
-                "guidingQuestions": [
-                    "Question 1?",
-                    "Question 2?"
-                ],
-                "learningConcept": "Concept name"
+                "id": "1",
+                "sentence": "Topic related to concept",
+                "phonetic": "/aɪ hæd biːn ˈstʌdiɪŋ fər ən aʊər/",
             }
         ]
     }
