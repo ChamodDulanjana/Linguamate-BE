@@ -7,7 +7,7 @@ from app.services.concept_extractor import ConceptExtractor
 concept_extractor = ConceptExtractor()
 
 class GrammarCorrector:
-    def respond(self, user_input: str) -> dict:
+    def respond(self, user_input: str, input_type: str) -> dict:
         if not user_input.strip():
             return {
                 "response": "Could you please type something so I can help you? 😊",
@@ -79,6 +79,7 @@ class GrammarCorrector:
             parsed = json.loads(content)
 
             if parsed.get("hasActionButtons"):
+                # Extract learning concepts
                 learning_concepts = concept_extractor.extract(
                     user_input, 
                     parsed.get("correctedText", ""),
@@ -90,11 +91,15 @@ class GrammarCorrector:
             end = content.rfind("}") + 1
             parsed = json.loads(content[start:end])
 
+        # AUTO VOICE MODE
+        voice_enabled = True if input_type == "speech" else False
+
         output = {
             "response": parsed.get("response", ""),
             "language": lang_info.language,
             "hasActionButtons": parsed.get("hasActionButtons", False),
-            "learningConcepts": parsed.get("learningConcepts", [])
+            "learningConcepts": parsed.get("learningConcepts", []),
+            "voiceEnabled": voice_enabled
         }
 
         return output

@@ -10,7 +10,7 @@ grammar_explanator = GrammarExplanator()
 
 @router.post("/grammar-correct")
 def grammar_correct(request: GrammarRequest):
-    return grammar_corrector.respond(request.text)
+    return grammar_corrector.respond(request.text, request.input_type)
 
 @router.post("/learning-concept-explain")
 def grammar_explain(request: LearningConceptRequest):
