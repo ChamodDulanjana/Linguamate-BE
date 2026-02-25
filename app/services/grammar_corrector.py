@@ -69,7 +69,7 @@ class GrammarCorrector:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_input}
                 ],
-                temperature=0.3
+                temperature=0.5
             )
         )
 
