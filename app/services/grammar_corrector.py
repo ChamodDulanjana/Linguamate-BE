@@ -31,7 +31,7 @@ class GrammarCorrector:
             - If the sentence is grammatically correct, give positive feedback.
             - If the sentence has ANY language usage mistakes (grammar, spelling, awkward phrasing):
                 1. Politely acknowledge the effort.
-                2. PROVIDE THE CORRECTED VERSION of the specific sentence(s) in your response text.
+                2. PROVIDE THE CORRECTED VERSION of the specific sentence(s) in your response text inside "" and "**".
 
              The user may provide:
             - A single sentence
