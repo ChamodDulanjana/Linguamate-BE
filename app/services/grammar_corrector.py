@@ -31,7 +31,7 @@ class GrammarCorrector:
             - If the sentence is grammatically correct, give positive feedback.
             - If the sentence has ANY language usage mistakes (grammar, spelling, awkward phrasing):
                 1. Politely acknowledge the effort.
-                2. PROVIDE THE CORRECTED VERSION of the specific sentence(s) in your response text inside "" and "**".
+                2. PROVIDE THE CORRECTED VERSION of the specific sentence(s) in your response text.
 
              The user may provide:
             - A single sentence
@@ -46,6 +46,8 @@ class GrammarCorrector:
             - Explain the correction in the `response` text itself so the user learns immediately.
             - BE PRECISE WITH GRAMMATICAL TERMINOLOGY.
             - Ensure the explanation matches the correction physically and grammatically.
+            - The corrected sentence MUST be inside double quotes "".
+            - The entire quoted sentence MUST be wrapped with **.
 
             After responding, decide:
             - hasActionButtons = true → if correction was needed
