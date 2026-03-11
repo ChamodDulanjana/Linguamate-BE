@@ -72,4 +72,4 @@ class ConceptExtractor:
 
         parsed = json.loads(response.choices[0].message.content)
 
-        return parsed.get("learningConcepts", [])
+        return [str(item) for item in parsed.get("learningConcepts", [])]
