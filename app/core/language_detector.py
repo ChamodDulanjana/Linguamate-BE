@@ -1,12 +1,24 @@
 import fasttext
 from pathlib import Path
 from app.models.language_detection import LanguageDetectionResult
+import os
+import urllib.request
 
+MODEL_URL = "https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin"
+MODEL_PATH = "app/models/lid.176.bin"
 
 class LanguageDetector:
     def __init__(self):
-        model_path = Path(__file__).parent.parent / "models" / "lid.176.bin"
-        self.model = fasttext.load_model(str(model_path))
+        # model_path = Path(__file__).parent.parent / "models" / "lid.176.bin"    
+        # self.model = fasttext.load_model(str(model_path))
+
+        if not os.path.exists(MODEL_PATH):
+            print("Downloading FastText model...")
+            os.makedirs("app/models", exist_ok=True)
+            urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+
+        self.model = fasttext.load_model(MODEL_PATH)
+        print("FastText model loaded successfully")
 
     def detect_language(self, text: str) -> LanguageDetectionResult:
         cleaned = text.strip().lower()
