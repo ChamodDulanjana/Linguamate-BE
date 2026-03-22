@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 from app.api.routes import api_router
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = FastAPI(
     title="LinguaMate Backend",
@@ -12,3 +16,10 @@ def root():
     return {"message": "LinguaMate backend is running 🚀"}
 
 app.include_router(api_router)
+
+# For local running
+if __name__ == "__main__":
+    import uvicorn
+
+    port = int(os.getenv("PORT", 8000)) # Render compatible
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)
