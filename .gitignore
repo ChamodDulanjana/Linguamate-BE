@@ -1,0 +1,19 @@
+# Virtual environment
+venv
+.env
+
+# ML model
+app/models/*.bin
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from app.api.routes import api_router
 
 app = FastAPI(
     title="LinguaMate Backend",
@@ -8,6 +9,6 @@ app = FastAPI(
 
 @app.get("/")
 def root():
-    return {
-        "message": "LinguaMate backend is running 🚀"
-    }
+    return {"message": "LinguaMate backend is running 🚀"}
+
+app.include_router(api_router)
